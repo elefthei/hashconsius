@@ -32,6 +32,8 @@
 //! (result unspecified), and `Map`/`Seq`/`Set` axioms. `verus-bumpalo`
 //! contributes trusted `try_allocate` and `slice_ref` bridges; the slice bridge
 //! is compiled but unused here.
+//! Native Send/Sync markers rely on exclusive arena ownership, immutable shared
+//! access, and T: Send/Sync respectively; Rust enforces those bounds outside SMT.
 //!
 //! Verus `0.2026.10.04` is newer than pinned vstd `2026-09-06`. Cargo-verus
 //! does not check compatibility by default; its optional `--check-toolchain`

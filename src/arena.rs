@@ -105,6 +105,16 @@ pub struct BHConsign<T: HashKey> {
     cid: usize,
 }
 
+// SAFETY: the consign owns its chunk and all stored keys. Insertion, reservation,
+// and reclamation require ownership or &mut self; moving keys requires T: Send.
+#[verifier::external]
+unsafe impl<T: HashKey + Send> Send for BHConsign<T> {}
+
+// SAFETY: shared methods only read keys and index metadata. References borrow the
+// consign, preventing mutation/free while shared, and T: Sync permits shared keys.
+#[verifier::external]
+unsafe impl<T: HashKey + Sync> Sync for BHConsign<T> {}
+
 impl<T: HashKey> View for BHConsign<T> {
     type V = Seq<T::V>;
     closed spec fn view(&self) -> Seq<T::V> {

@@ -87,7 +87,7 @@ checksum = "a2c754d6c33795a1c324727428e5a7dedb5b06195f9890bdbcba760d3e246563"
 [[package]]
 name = "verus-bumpalo"
 version = "0.1.0"
-source = "git+https://github.com/elefthei/bumpus?rev=00f3707fa9ac90818ddbd5a422d63dd639feb06e#00f3707fa9ac90818ddbd5a422d63dd639feb06e"
+source = "git+https://github.com/elefthei/bumpus?rev=36c8e8723d767934a502fc1d9cea0ba49cff54ab#36c8e8723d767934a502fc1d9cea0ba49cff54ab"
 dependencies = [
  "vstd",
 ]
