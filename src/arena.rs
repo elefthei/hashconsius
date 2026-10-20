@@ -1,4 +1,5 @@
 //! Fixed-capacity hash consing. Call `free` to release the chunk; stored destructors never run.
+use alloc::vec::Vec;
 use core::cmp::Ordering;
 use core::marker::PhantomData;
 use verus_bumpalo::{AllocErr, Bump, BumpState, BumpTok};
@@ -129,6 +130,10 @@ impl<T: HashKey> BHConsign<T> {
         self@.map_values(|v: T::V| T::spec_hash(v))
     }
     pub closed spec fn remaining(self) -> int { self.bump.remaining(self.st@) }
+    pub closed spec fn capacity(self) -> int { self.bump.capacity() }
+    pub closed spec fn aligned(self) -> bool {
+        self.bump.cursor(self.st@) as int % align_of::<T>() as int == 0
+    }
     pub closed spec fn spec_cid(self) -> usize { self.cid }
     pub open spec fn owns(self, h: BHConsed<T>) -> bool {
         h.spec_cid() == self.spec_cid() && h.spec_uid() < self@.len()
@@ -148,15 +153,20 @@ impl<T: HashKey> BHConsign<T> {
     pub fn new(arena_bytes: usize) -> (r: Result<Self, AllocErr>)
         ensures
             r matches Ok(c) ==> c.inv() && c@ == Seq::<T::V>::empty()
-                && c.remaining() == arena_bytes,
+                && c.remaining() == arena_bytes && c.capacity() == arena_bytes
+                && (align_of::<T>() <= verus_bumpalo::CHUNK_ALIGN
+                    && arena_bytes as int % align_of::<T>() as int == 0 ==> c.aligned()),
     { Self::with_capacity(arena_bytes, 16) }
 
     /// Creates a fixed arena with an initial hash-index capacity.
     pub fn with_capacity(arena_bytes: usize, capacity: usize) -> (r: Result<Self, AllocErr>)
         ensures
             r matches Ok(c) ==> c.inv() && c@ == Seq::<T::V>::empty()
-                && c.remaining() == arena_bytes,
+                && c.remaining() == arena_bytes && c.capacity() == arena_bytes
+                && (align_of::<T>() <= verus_bumpalo::CHUNK_ALIGN
+                    && arena_bytes as int % align_of::<T>() as int == 0 ==> c.aligned()),
     {
+        vstd::layout::layout_for_type_is_valid::<T>();
         let (bump, Tracked(st)) = match Bump::try_with_capacity(arena_bytes) {
             Ok(pair) => pair,
             Err(e) => return Err(e),
@@ -167,6 +177,13 @@ impl<T: HashKey> BHConsign<T> {
             cid: crate::fresh_cid(),
         };
         proof {
+            bump.lemma_wf(st);
+            if align_of::<T>() <= verus_bumpalo::CHUNK_ALIGN
+                && arena_bytes as int % align_of::<T>() as int == 0 {
+                verus_bumpalo::lemma_chunk_align_divides(bump.start() as int, align_of::<T>() as int);
+                vstd::arithmetic::div_mod::lemma_mod_adds(
+                    bump.start() as int, arena_bytes as int, align_of::<T>() as int);
+            }
             assert(r@ =~= Seq::<T::V>::empty());
             assert(r.hashes() =~= Seq::<u64>::empty());
             assert forall|id: Id| r.st@.outstanding().contains(id) <==>
@@ -216,6 +233,8 @@ impl<T: HashKey> BHConsign<T> {
         ensures final(self).inv(), final(self)@ == old(self)@,
             final(self).spec_cid() == old(self).spec_cid(),
             final(self).remaining() == old(self).remaining(),
+            final(self).aligned() == old(self).aligned(),
+            final(self).capacity() == old(self).capacity(),
             forall|h: BHConsed<T>| old(self).owns(h) ==> #[trigger] final(self).owns(h),
     {
         let total = self.ptrs.len() + additional;
@@ -223,7 +242,7 @@ impl<T: HashKey> BHConsign<T> {
         self.index.reserve(total, Ghost(self.hashes()));
     }
 
-    fn find(&self, x: &T) -> (r: Option<usize>)
+    pub fn find(&self, x: &T) -> (r: Option<usize>)
         requires self.inv(),
         ensures
             r matches Some(u) ==> u < self@.len() && self@[u as int] == x@,
@@ -270,6 +289,12 @@ impl<T: HashKey> BHConsign<T> {
             old(self)@.is_prefix_of(final(self)@),
             forall|h: BHConsed<T>| old(self).owns(h) ==> #[trigger] final(self).owns(h),
             final(self).remaining() <= old(self).remaining(),
+            final(self).capacity() == old(self).capacity(),
+            r is Err ==> final(self).aligned() == old(self).aligned(),
+            old(self).aligned() ==> final(self).aligned(),
+            old(self).aligned() && (r matches Ok((h, true))) ==>
+                final(self).remaining() == old(self).remaining() - size_of::<T>(),
+            old(self).aligned() && r is Err ==> size_of::<T>() > old(self).remaining(),
             r matches Err(y) ==> y == x && final(self)@ == old(self)@
                 && final(self).remaining() == old(self).remaining(),
             r matches Ok((h, fresh)) ==> {
@@ -294,7 +319,13 @@ impl<T: HashKey> BHConsign<T> {
         vstd::layout::layout_for_type_is_valid::<T>();
         let size = core::mem::size_of::<T>();
         let align = core::mem::align_of::<T>();
-        proof { verus_bumpalo::lemma_pow2_witness(align); }
+        proof {
+            verus_bumpalo::lemma_pow2_witness(align);
+            if self.aligned() {
+                verus_bumpalo::lemma_align_down_exact(
+                    self.bump.cursor(self.st@) as int, size as int, align as int);
+            }
+        }
         let (p, Tracked(raw), Tracked(tok)) = match self.bump.try_alloc(
             size, align, Tracked(self.st.borrow_mut())) {
             Ok(parts) => parts,
@@ -360,6 +391,12 @@ impl<T: HashKey> BHConsign<T> {
             old(self)@.is_prefix_of(final(self)@),
             forall|h: BHConsed<T>| old(self).owns(h) ==> #[trigger] final(self).owns(h),
             final(self).remaining() <= old(self).remaining(),
+            final(self).capacity() == old(self).capacity(),
+            r is Err ==> final(self).aligned() == old(self).aligned(),
+            old(self).aligned() ==> final(self).aligned(),
+            old(self).aligned() && r is Ok && !old(self)@.contains(x@) ==>
+                final(self).remaining() == old(self).remaining() - size_of::<T>(),
+            old(self).aligned() && r is Err ==> size_of::<T>() > old(self).remaining(),
             r matches Err(y) ==> y == x && final(self)@ == old(self)@
                 && final(self).remaining() == old(self).remaining(),
             r matches Ok(h) ==> {

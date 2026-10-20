@@ -1,4 +1,5 @@
 //! Chained hash index; user-key comparison stays in the consign.
+use alloc::vec::Vec;
 use vstd::prelude::*;
 
 verus! {

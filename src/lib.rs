@@ -79,17 +79,28 @@
 //! Heap storage retains strong references until the consign drops. Arena payload
 //! capacity is fixed and insertion and construction are fallible.
 //! Unlike `hashconsing`, uids are `usize`; weak handles/collection, global macros,
-//! custom collection wrappers/hashers, formatting/derive helpers, folds, shrinking,
-//! and capacity queries are not provided. Clients can key maps by `handle.uid()`.
+//! custom collection wrappers/hashers, formatting/derive helpers, folds, and shrinking
+//! are not provided. Clients can key maps by `handle.uid()`.
+//! Arena capacity, alignment, and remaining payload bytes have exact verified contracts.
+//! Disable the default `std` feature for arena/index-only `no_std` + `alloc` clients.
+
+#![no_std]
+
+extern crate alloc;
+#[cfg(feature = "std")]
+extern crate std;
 
 use vstd::prelude::*;
 
 pub use verus_bumpalo::AllocErr;
 pub mod index;
+#[cfg(feature = "std")]
 pub mod heap;
+#[cfg(feature = "std")]
 pub use heap::{HConsed, HConsign};
 pub mod arena;
 pub use arena::{BHConsed, BHConsign};
+#[cfg(feature = "std")]
 pub mod demo;
 
 verus! {

@@ -1,4 +1,5 @@
 //! Strong-reference heap hash consing; handles retain their values independently.
+use alloc::vec::Vec;
 use std::cmp::Ordering;
 use std::sync::Arc;
 use vstd::prelude::*;

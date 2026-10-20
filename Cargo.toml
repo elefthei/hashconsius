@@ -3,9 +3,13 @@ name = "hashconsius"
 version = "0.1.0"
 edition = "2021"
 
+[features]
+default = ["std"]
+std = ["vstd/std"]
+
 [dependencies]
-vstd = "=0.0.0-2026-09-06-0133"
-verus-bumpalo = { path = "../bumpus" }
+vstd = { version = "=0.0.0-2026-09-06-0133", default-features = false, features = ["alloc"] }
+verus-bumpalo = { git = "https://github.com/elefthei/bumpus", rev = "00f3707fa9ac90818ddbd5a422d63dd639feb06e" }
 
 [package.metadata.verus]
 verify = true

@@ -4,7 +4,9 @@ Verified heap and fixed-capacity arena hash consing, ported from `hashconsing`.
 See the crate documentation in `src/lib.rs` for the contract, trust boundary,
 and deliberate compatibility differences.
 
-Requires sibling `../bumpus` (`verus-bumpalo`), Rust 1.98.1, and Verus on PATH.
+Requires Rust 1.98.1 and Verus on PATH; `verus-bumpalo` is pinned from git.
+The arena and bucket index support `no_std` with `alloc` (`--no-default-features`);
+the default `std` feature also exposes heap consing and the demos.
 The vstd pin matches the current allocator, not the newer verifier (see the
 trust inventory in `src/lib.rs`). `demo::arena_smoke()` returns
 `Result<usize, AllocErr>`, proving `Ok(4)` when runtime sizing and construction
@@ -14,6 +16,7 @@ succeed. `demo::heap_smoke()` returns `4`.
 cargo clean && cargo verus verify
 cargo test
 cargo build --release --all-targets
+cargo build --no-default-features --target thumbv7m-none-eabi
 ```
 
 The clean run makes both crates' `verification results` lines visible.
