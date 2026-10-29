@@ -35,10 +35,8 @@
 //! Native Send/Sync markers rely on exclusive arena ownership, immutable shared
 //! access, and T: Send/Sync respectively; Rust enforces those bounds outside SMT.
 //!
-//! Verus `0.2026.10.04` is newer than pinned vstd `2026-09-06`. Cargo-verus
-//! does not check compatibility by default; its optional `--check-toolchain`
-//! rejects this pair as incompatible. Verification passes without that check,
-//! but does not establish toolchain compatibility; the pin is owned by bumpus.
+//! Verus `0.2026.10.04` matches pinned vstd `2026-10-04`; the pin is owned by
+//! bumpus and `cargo verus verify --check-toolchain` accepts the pair.
 //!
 //! For unverified callers, `BHConsign::get` checks uid bounds and the handle's
 //! consign id and panics on mismatch; `HConsign` handles carry the same id. Ids

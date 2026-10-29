@@ -8,8 +8,8 @@ default = ["std"]
 std = ["vstd/std"]
 
 [dependencies]
-vstd = { version = "=0.0.0-2026-09-06-0133", default-features = false, features = ["alloc"] }
-verus-bumpalo = { git = "https://github.com/elefthei/bumpus", rev = "36c8e8723d767934a502fc1d9cea0ba49cff54ab" }
+vstd = { version = "=0.0.0-2026-10-04-0306", default-features = false, features = ["alloc"] }
+verus-bumpalo = { git = "https://github.com/elefthei/bumpus", rev = "888a6983370524cf1686d82e5814dd17a2dd14e5" }
 
 [package.metadata.verus]
 verify = true

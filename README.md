@@ -7,8 +7,8 @@ and deliberate compatibility differences.
 Requires Rust 1.98.1 and Verus on PATH; `verus-bumpalo` is pinned from git.
 The arena and bucket index support `no_std` with `alloc` (`--no-default-features`);
 the default `std` feature also exposes heap consing and the demos.
-The vstd pin matches the current allocator, not the newer verifier (see the
-trust inventory in `src/lib.rs`). `demo::arena_smoke()` returns
+The vstd pin matches both the allocator and the verifier (see the trust
+inventory in `src/lib.rs`). `demo::arena_smoke()` returns
 `Result<usize, AllocErr>`, proving `Ok(4)` when runtime sizing and construction
 succeed. `demo::heap_smoke()` returns `4`.
 
@@ -25,5 +25,4 @@ The intended stricter command is
 version also checks imported trusted items and rejects bumpus's `Layout` bridge
 even with root-only forwarding; it does not currently enforce a local-only
 zero-trust policy. Bumpus retains its three trusted bridges unchanged.
-`cargo verus verify --check-toolchain` separately rejects the verifier/vstd pair;
-ordinary verification does not check that compatibility by default.
+`cargo verus verify --check-toolchain` accepts the verifier/vstd pair.
