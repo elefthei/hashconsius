@@ -1,7 +1,13 @@
 [package]
 name = "hashconsius"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
+license = "MIT"
+description = "Formally verified (Verus) hash consing with heap and fixed-capacity arena consigns"
+repository = "https://github.com/elefthei/hashconsius"
+readme = "README.md"
+keywords = ["hashconsing", "arena", "verus", "verified", "no-std"]
+categories = ["data-structures", "memory-management", "no-std"]
 
 [features]
 default = ["std"]
@@ -9,7 +15,7 @@ std = ["vstd/std"]
 
 [dependencies]
 vstd = { version = "=0.0.0-2026-10-04-0306", default-features = false, features = ["alloc"] }
-verus-bumpalo = { git = "https://github.com/elefthei/bumpus", rev = "888a6983370524cf1686d82e5814dd17a2dd14e5" }
+bumpus = "=0.1.1"
 
 [package.metadata.verus]
 verify = true

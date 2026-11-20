@@ -15,7 +15,7 @@
 //! Arena insertion returns the original input unchanged on exhaustion. Arena
 //! handles are inert `(consign id, uid)` pairs: access requires the owning consign
 //! and its verified ownership predicate. `free` returns the whole chunk; stored destructors never
-//! run. Dropping an arena without `free` leaks its chunk, as in `verus-bumpalo`.
+//! run. Dropping an arena without `free` leaks its chunk, as in `bumpus`.
 //!
 //! # Trust and compatibility
 //! This crate has no local trusted specifications or `global` layout axioms;
@@ -29,7 +29,7 @@
 //! comparison model (address/metadata, not provenance), layout validity,
 //! `core::mem::size_of`/`align_of`, checked arithmetic, `usize` comparisons,
 //! wrapping `u64` arithmetic, `core::sync::atomic::AtomicUsize::new`/`fetch_add`
-//! (result unspecified), and `Map`/`Seq`/`Set` axioms. `verus-bumpalo`
+//! (result unspecified), and `Map`/`Seq`/`Set` axioms. `bumpus`
 //! contributes trusted `try_allocate` and `slice_ref` bridges; the slice bridge
 //! is compiled but unused here.
 //! Native Send/Sync markers rely on exclusive arena ownership, immutable shared
@@ -70,7 +70,7 @@
 //! | `HashMap<T, _>` / `HashMap<&T, _>` | Generic key-model obligations cannot be proved for arbitrary client keys; replaced by verified uid-indexed `index::Buckets`. |
 //! | Derived `Hash + Eq` | Not verified by Verus; replaced by the verified `HashKey` contract. |
 //! | `Weak`, weak handles, collection, reference counts | No vstd `Weak` specification; dropped in favor of consign-held strong `Arc`s, without `T: Clone`. |
-//! | `bumpalo::Bump` | Replaced by verified `verus-bumpalo` and tracked allocation permissions/tokens. |
+//! | `bumpalo::Bump` | Replaced by verified `bumpus` and tracked allocation permissions/tokens. |
 //! | Arena `&T` handles | Replaced by inert copyable (consign id, uid) handles; references require `consign.get(handle)` and ownership. |
 //! | `consign!`, collection wrappers/hashers, formatting, handle hashing, derives, folds, shrinking/capacity | External or out of scope; omitted. Use uid-keyed client collections. |
 //! | `Arc` | Kept; its allocation, cloning, dereference, and view use vstd's trusted model. |
@@ -92,7 +92,7 @@ extern crate std;
 
 use vstd::prelude::*;
 
-pub use verus_bumpalo::AllocErr;
+pub use bumpus::AllocErr;
 pub mod index;
 #[cfg(feature = "std")]
 pub mod heap;

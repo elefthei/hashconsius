@@ -2,9 +2,9 @@
 use alloc::vec::Vec;
 use core::cmp::Ordering;
 use core::marker::PhantomData;
-use verus_bumpalo::{AllocErr, Bump, BumpState, BumpTok};
+use bumpus::{AllocErr, Bump, BumpState, BumpTok};
 #[cfg(verus_only)]
-use verus_bumpalo::{Alloc, Id, back_wf};
+use bumpus::{Alloc, Id, back_wf};
 use vstd::prelude::*;
 use vstd::raw_ptr::{PointsTo, ptr_mut_write, ptr_ref};
 #[cfg(verus_only)]
@@ -164,7 +164,7 @@ impl<T: HashKey> BHConsign<T> {
         ensures
             r matches Ok(c) ==> c.inv() && c@ == Seq::<T::V>::empty()
                 && c.remaining() == arena_bytes && c.capacity() == arena_bytes
-                && (align_of::<T>() <= verus_bumpalo::CHUNK_ALIGN
+                && (align_of::<T>() <= bumpus::CHUNK_ALIGN
                     && arena_bytes as int % align_of::<T>() as int == 0 ==> c.aligned()),
     { Self::with_capacity(arena_bytes, 16) }
 
@@ -173,7 +173,7 @@ impl<T: HashKey> BHConsign<T> {
         ensures
             r matches Ok(c) ==> c.inv() && c@ == Seq::<T::V>::empty()
                 && c.remaining() == arena_bytes && c.capacity() == arena_bytes
-                && (align_of::<T>() <= verus_bumpalo::CHUNK_ALIGN
+                && (align_of::<T>() <= bumpus::CHUNK_ALIGN
                     && arena_bytes as int % align_of::<T>() as int == 0 ==> c.aligned()),
     {
         vstd::layout::layout_for_type_is_valid::<T>();
@@ -188,9 +188,9 @@ impl<T: HashKey> BHConsign<T> {
         };
         proof {
             bump.lemma_wf(st);
-            if align_of::<T>() <= verus_bumpalo::CHUNK_ALIGN
+            if align_of::<T>() <= bumpus::CHUNK_ALIGN
                 && arena_bytes as int % align_of::<T>() as int == 0 {
-                verus_bumpalo::lemma_chunk_align_divides(bump.start() as int, align_of::<T>() as int);
+                bumpus::lemma_chunk_align_divides(bump.start() as int, align_of::<T>() as int);
                 vstd::arithmetic::div_mod::lemma_mod_adds(
                     bump.start() as int, arena_bytes as int, align_of::<T>() as int);
             }
@@ -330,9 +330,9 @@ impl<T: HashKey> BHConsign<T> {
         let size = core::mem::size_of::<T>();
         let align = core::mem::align_of::<T>();
         proof {
-            verus_bumpalo::lemma_pow2_witness(align);
+            bumpus::lemma_pow2_witness(align);
             if self.aligned() {
-                verus_bumpalo::lemma_align_down_exact(
+                bumpus::lemma_align_down_exact(
                     self.bump.cursor(self.st@) as int, size as int, align as int);
             }
         }

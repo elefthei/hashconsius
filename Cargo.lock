@@ -3,6 +3,15 @@
 version = 4
 
 [[package]]
+name = "bumpus"
+version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "89029d123150efe13c890affb7e0a5fb524b522ddabc66347fc4059a08fd6eff"
+dependencies = [
+ "vstd",
+]
+
+[[package]]
 name = "convert_case"
 version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -22,9 +31,9 @@ checksum = "ed5909b6e89a2db4456e54cd5f673791d7eca6732202bbf2a9cc504fe2f9b84a"
 
 [[package]]
 name = "hashconsius"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
- "verus-bumpalo",
+ "bumpus",
  "vstd",
 ]
 
@@ -83,14 +92,6 @@ name = "unicode-ident"
 version = "1.0.27"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a2c754d6c33795a1c324727428e5a7dedb5b06195f9890bdbcba760d3e246563"
-
-[[package]]
-name = "verus-bumpalo"
-version = "0.1.0"
-source = "git+https://github.com/elefthei/bumpus?rev=888a6983370524cf1686d82e5814dd17a2dd14e5#888a6983370524cf1686d82e5814dd17a2dd14e5"
-dependencies = [
- "vstd",
-]
 
 [[package]]
 name = "verus_builtin"

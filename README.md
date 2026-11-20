@@ -4,7 +4,7 @@ Verified heap and fixed-capacity arena hash consing, ported from `hashconsing`.
 See the crate documentation in `src/lib.rs` for the contract, trust boundary,
 and deliberate compatibility differences.
 
-Requires Rust 1.98.1 and Verus on PATH; `verus-bumpalo` is pinned from git.
+Requires Rust 1.98.1 and Verus on PATH; `bumpus` is pinned to `=0.1.1`.
 The arena and bucket index support `no_std` with `alloc` (`--no-default-features`);
 the default `std` feature also exposes heap consing and the demos.
 The vstd pin matches both the allocator and the verifier (see the trust
