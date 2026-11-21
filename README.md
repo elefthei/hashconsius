@@ -7,9 +7,9 @@ fixed-capacity bump arena backed by [`bumpus`](https://crates.io/crates/bumpus).
 
 The proved contract: a consign never holds two values with the same key view,
 and two handles from the same consign have equal uids exactly when their views
-are equal. Your keys implement the verified `HashKey` trait instead of
-`Hash + Eq`. The crate docs in `src/lib.rs` spell out what is trusted and where
-this crate departs from `hashconsing`. Read them before relying on the proofs.
+are equal. Keys implement the verified `HashKey` trait instead of `Hash + Eq`.
+The crate docs in `src/lib.rs` list the trusted base and every departure from
+`hashconsing`.
 
 ## Features
 
@@ -21,8 +21,8 @@ and construction succeed.
 
 ## Building and verifying
 
-You need Rust 1.98.1 (pinned in `rust-toolchain.toml`). Building and testing
-work with plain cargo. Verification also needs Verus on your `PATH`.
+Rust 1.98.1 is pinned in `rust-toolchain.toml`. Building and testing need only
+cargo; verification also needs Verus on `PATH`.
 
 ```sh
 cargo clean && cargo verus verify
@@ -31,16 +31,24 @@ cargo build --release --all-targets
 cargo build --no-default-features --target thumbv7m-none-eabi
 ```
 
-Start from `cargo clean` so both crates print their `verification results`
-line.
+Starting from `cargo clean` makes every verified crate print its
+`verification results` line.
 
 Dependencies are pinned exactly: vstd `=0.0.0-2026-10-04-0306` and bumpus
 `=0.1.1`. That vstd build matches the allocator and Verus 0.2026.10.04, and
 `cargo verus verify --check-toolchain` accepts the pair.
 
-One gap remains. The command I actually want is
-`cargo verus verify --fwd-verus-args-to roots -- --no-cheating`, but this Verus
-version also checks trusted items imported from dependencies. It rejects
-bumpus's `Layout` bridge even with root-only forwarding, so there's no way yet
-to enforce zero-trust on this crate alone. Bumpus keeps its three trusted
-bridges as they are.
+## Trusted code
+
+This crate has no `assume`, `admit`, or local trusted specifications, and
+Verus enforces that:
+
+```sh
+cargo verus verify --fwd-verus-args-to roots -- --no-cheating
+```
+
+The flag applies only to this crate. Forwarding it everywhere
+(`cargo verus verify -- --no-cheating`) fails inside vstd, which uses `assume`
+itself. Dependencies stay trusted as written; bumpus contributes three trusted
+bridges: `try_allocate`, `slice_ref`, and the `Layout` size/alignment
+specifications.

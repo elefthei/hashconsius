@@ -21,7 +21,8 @@
 //! This crate has no local trusted specifications or `global` layout axioms;
 //! its proofs do not fix the pointer width. On Verus `0.2026.10.04.426d8b0`,
 //! `cargo verus verify --fwd-verus-args-to roots -- --no-cheating` passes for
-//! this crate.
+//! this crate. The flag reaches only this crate: forwarding it to every crate
+//! (`cargo verus verify -- --no-cheating`) fails on vstd's own `assume`s.
 //!
 //! The trusted base includes the Verus verifier, erasure macros, Z3, and rustc;
 //! vstd's `Arc::new`, cloning/dereference, `Vec` push/reserve/capacity and length
@@ -29,9 +30,9 @@
 //! comparison model (address/metadata, not provenance), layout validity,
 //! `core::mem::size_of`/`align_of`, checked arithmetic, `usize` comparisons,
 //! wrapping `u64` arithmetic, `core::sync::atomic::AtomicUsize::new`/`fetch_add`
-//! (result unspecified), and `Map`/`Seq`/`Set` axioms. `bumpus`
-//! contributes trusted `try_allocate` and `slice_ref` bridges; the slice bridge
-//! is compiled but unused here.
+//! (result unspecified), and `Map`/`Seq`/`Set` axioms. `bumpus` contributes
+//! three trusted bridges: `try_allocate`, `slice_ref` (compiled but unused
+//! here), and the `Layout` size/alignment specifications.
 //! Native Send/Sync markers rely on exclusive arena ownership, immutable shared
 //! access, and T: Send/Sync respectively; Rust enforces those bounds outside SMT.
 //!
