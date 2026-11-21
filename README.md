@@ -35,7 +35,7 @@ Starting from `cargo clean` makes every verified crate print its
 `verification results` line.
 
 Dependencies are pinned exactly: vstd `=0.0.0-2026-10-04-0306` and bumpus
-`=0.1.1`. That vstd build matches the allocator and Verus 0.2026.10.04, and
+`=0.1.2`. That vstd build matches the allocator and Verus 0.2026.10.04, and
 `cargo verus verify --check-toolchain` accepts the pair.
 
 ## Trusted code

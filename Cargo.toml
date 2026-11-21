@@ -1,6 +1,6 @@
 [package]
 name = "hashconsius"
-version = "0.1.3"
+version = "0.1.4"
 edition = "2021"
 license = "MIT"
 description = "Formally verified (Verus) hash consing with heap and fixed-capacity arena consigns"
@@ -15,7 +15,7 @@ std = ["vstd/std"]
 
 [dependencies]
 vstd = { version = "=0.0.0-2026-10-04-0306", default-features = false, features = ["alloc"] }
-bumpus = "=0.1.1"
+bumpus = "=0.1.2"
 
 [package.metadata.verus]
 verify = true

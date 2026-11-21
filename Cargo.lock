@@ -4,9 +4,9 @@ version = 4
 
 [[package]]
 name = "bumpus"
-version = "0.1.1"
+version = "0.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "89029d123150efe13c890affb7e0a5fb524b522ddabc66347fc4059a08fd6eff"
+checksum = "a4c9b8b9784c2d50bdb1bd4b79f9ffdc6c0429a25ffe037256cd290163df76ab"
 dependencies = [
  "vstd",
 ]
@@ -31,7 +31,7 @@ checksum = "ed5909b6e89a2db4456e54cd5f673791d7eca6732202bbf2a9cc504fe2f9b84a"
 
 [[package]]
 name = "hashconsius"
-version = "0.1.3"
+version = "0.1.4"
 dependencies = [
  "bumpus",
  "vstd",
