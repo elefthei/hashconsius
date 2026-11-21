@@ -1,16 +1,28 @@
 # hashconsius
 
-Verified heap and fixed-capacity arena hash consing, ported from `hashconsing`.
-See the crate documentation in `src/lib.rs` for the contract, trust boundary,
-and deliberate compatibility differences.
+Hash consing for Rust, proved correct with Verus. It's a port of
+[`hashconsing`](https://crates.io/crates/hashconsing) with two storage modes:
+`HConsign` keeps values in heap `Arc`s, and `BHConsign` packs them into a
+fixed-capacity bump arena backed by [`bumpus`](https://crates.io/crates/bumpus).
 
-Requires Rust 1.98.1 and Verus on PATH; `bumpus` is pinned to `=0.1.1`.
-The arena and bucket index support `no_std` with `alloc` (`--no-default-features`);
-the default `std` feature also exposes heap consing and the demos.
-The vstd pin matches both the allocator and the verifier (see the trust
-inventory in `src/lib.rs`). `demo::arena_smoke()` returns
-`Result<usize, AllocErr>`, proving `Ok(4)` when runtime sizing and construction
-succeed. `demo::heap_smoke()` returns `4`.
+The proved contract: a consign never holds two values with the same key view,
+and two handles from the same consign have equal uids exactly when their views
+are equal. Your keys implement the verified `HashKey` trait instead of
+`Hash + Eq`. The crate docs in `src/lib.rs` spell out what is trusted and where
+this crate departs from `hashconsing`. Read them before relying on the proofs.
+
+## Features
+
+The arena and the bucket index work under `no_std` with `alloc`; build with
+`--no-default-features`. The default `std` feature adds heap consing and the
+`demo` module. `demo::heap_smoke()` returns `4`. `demo::arena_smoke()` returns
+`Result<usize, AllocErr>` and is proved to give `Ok(4)` whenever runtime sizing
+and construction succeed.
+
+## Building and verifying
+
+You need Rust 1.98.1 (pinned in `rust-toolchain.toml`). Building and testing
+work with plain cargo. Verification also needs Verus on your `PATH`.
 
 ```sh
 cargo clean && cargo verus verify
@@ -19,10 +31,16 @@ cargo build --release --all-targets
 cargo build --no-default-features --target thumbv7m-none-eabi
 ```
 
-The clean run makes both crates' `verification results` lines visible.
-The intended stricter command is
+Start from `cargo clean` so both crates print their `verification results`
+line.
+
+Dependencies are pinned exactly: vstd `=0.0.0-2026-10-04-0306` and bumpus
+`=0.1.1`. That vstd build matches the allocator and Verus 0.2026.10.04, and
+`cargo verus verify --check-toolchain` accepts the pair.
+
+One gap remains. The command I actually want is
 `cargo verus verify --fwd-verus-args-to roots -- --no-cheating`, but this Verus
-version also checks imported trusted items and rejects bumpus's `Layout` bridge
-even with root-only forwarding; it does not currently enforce a local-only
-zero-trust policy. Bumpus retains its three trusted bridges unchanged.
-`cargo verus verify --check-toolchain` accepts the verifier/vstd pair.
+version also checks trusted items imported from dependencies. It rejects
+bumpus's `Layout` bridge even with root-only forwarding, so there's no way yet
+to enforce zero-trust on this crate alone. Bumpus keeps its three trusted
+bridges as they are.
